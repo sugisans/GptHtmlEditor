@@ -1,0 +1,26 @@
+{
+    "title": "easy html editor",
+    "version": "v1.0",
+    "escapehtml": "on",
+    "indexof": "on",
+    "document_root": "",
+    "system_user": "",
+    "ssl_key_file": "",
+    "ssl_cert_file": "",
+    "port": 3000,
+    "GPT": {
+        "port": 8080,
+        "temperature": 0.7,
+        "model": "gpt-4.1-mini",
+        "key": ""
+    },
+    "CACHE": {
+        "status": "on",
+        "max_age": 3600
+    },
+    "LOG": {
+        "status": "off",
+        "dir": "",
+        "file": "accesss.log"
+    }
+}
