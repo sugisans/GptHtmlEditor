@@ -20,5 +20,5 @@ App page file = ./www/index.ejs
 }
 
 
-![代替テキスト](img/example.png)
+![代替テキスト](img/example.jpg)
 
