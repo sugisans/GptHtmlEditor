@@ -1,36 +1,20 @@
-# node_httpd
+# gpt html editor
 
-Execute = $node bin/httpd.js
+Execute = $node bin/app.js
 
 Default access = http://localhost:3000
 
+Default api access = http://localhost:8080
+
 Setting file = ./etc/config.json
 
-Top directory = ./www
+App page file = ./www/index.ejs
 
-
-Examples
-
-        View files are html or ejs
-
-        ./www/example.html
-
-        ./www/example.ejs
-
-        ./www/css/example.css
-
-        ./www/js/example.js
-
-        ./www/img/example.jpg
-
-
-ENV value of ejs
-
-        POST['name']
-
-        GET['name']
-
-        COOKIE['name']      DEFINE['response'].setHeader('Set-Cookie', [`value; expires; max-age`]);
-
-        DEFINE['name']      ./etc/define.json
+Set up gpt key to ./etc/config.json
+        "GPT": {
+                "port": 8080,                   //set to API port
+                "temperature": 0.7,             //set to temperature
+                "model": "gpt-4.1-mini",        //set to gpt model
+                "key": ""                       //set to API key
+        },
 
