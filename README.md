@@ -17,5 +17,5 @@ App page file = ./www/index.ejs
 
 
 
-![代替テキスト](img/example.jpg)
+![イメージ画像](img/example.jpg)
 

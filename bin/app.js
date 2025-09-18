@@ -15,7 +15,6 @@ const mimeFile = fs.readFileSync(root_dir + 'etc/mime.json', 'UTF-8');
 const statusFile = fs.readFileSync(root_dir + 'etc/status.json', 'UTF-8');
 const statusEjs = fs.readFileSync(root_dir + 'etc/default_page/status.ejs', 'UTF-8');
 const indexEjs = fs.readFileSync(root_dir + 'etc/default_page/index.ejs', 'UTF-8');
-const indexOfEjs = fs.readFileSync(root_dir + 'etc/default_page/indexof.ejs', 'UTF-8');
 
 //default config value
 let config = JSON.parse(configFile);
@@ -90,7 +89,7 @@ const log_file = `${config['LOG']['dir']}/${config['LOG']['file']}`;
 if (cluster.isMaster) {
     for (let i = 0; i < cpu.length; i++) {
         //Open browser
-        if(i === 0){
+        if(i === 0 && config['browser'] && config['browser'] === 'on'){
             const url = `http://localhost:${config['port']}`;
             openBrowser(url);
         }
@@ -138,16 +137,20 @@ if (cluster.isMaster) {
             }
             break;
         default:
-            if (port < 1024 || port > 65535) {
+            if (typeof port !== "number" || port < 1024 || port > 65535) {
                 console.log("port error [80 or 443 or 1024-65535]");
                 process.exit(-1);
             }
             server.listen(process.env.PORT || port);
     }
 
+    if(config['port'] === config['GPT']['port'] || config['GPT']['port'] < 1024 ||  config['GPT']['port'] > 65535){
+        console.error(`API port error [1024-65535 and not same http port ${config['port']}]`);
+        process.exit(-1);
+    }
     const api = http.createServer(ApiRouting);
-    api.listen(config['GPT']['port'] || 8080);
-    console.log(`openAI API server port ${config['GPT']['port'] || 8080}`);
+    api.listen(config['GPT']['port']);
+    console.log(`openAI API server port ${config['GPT']['port']}`);
 
     const msg = process.env.msg;
     process.send(`from worker (${msg})`);
@@ -157,7 +160,6 @@ if (cluster.isMaster) {
 
 cluster.on('exit', function(worker, code, signal) {
     console.log('Worker %d died with code/signal %s. Restarting worker...', worker.process.pid, signal || code);
-    cluster.fork();
 });
 
 function ApiRouting(req, res) {
@@ -295,14 +297,6 @@ function RouteSetting(req, res) {
                         }
                     } else if (urldata.pathname == '/') { //top dir
                         page = ejs.render(indexEjs, { config, dir });
-                    } else if (config['indexof'] == 'on') { //index of
-                        const list = {
-                            "path": urldata.pathname,
-                            "os": os,
-                            "host": req.headers['host'],
-                            "files": files
-                        };
-                        page = ejs.render(indexOfEjs, { config, list });
                     } else {
                         code = 403;
                         page = status_page(code);
@@ -384,12 +378,11 @@ function ejs_render(req, res, page) {
    try {
         const COOKIE = get_cookie(req.headers['cookie']);
         const DEFINE = JSON.parse(fs.readFileSync(root_dir + 'etc/define.json', 'UTF-8'));
-        const SECURE = config['escapehtml'] && config['escapehtml'] === 'on';
         DEFINE['response'] = res;
-        DEFINE['gpt_port'] = config['GPT']['port'] || 8080;
+        DEFINE['gpt_port'] = config['GPT']['port'];
         
         const locals = {
-            COOKIE: SECURE ? sanitizeObject(COOKIE) : COOKIE,
+            COOKIE: sanitizeObject(COOKIE),
             DEFINE,
         };
 
