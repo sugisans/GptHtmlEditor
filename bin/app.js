@@ -21,6 +21,10 @@ let config = JSON.parse(configFile);
 const mime_type = JSON.parse(mimeFile);
 const status_code = JSON.parse(statusFile);
 const os = process.platform;
+const header_source = {
+    'Pragma': 'no-cache',
+    'Cache-Control': 'no-cache'
+}
 
 //api value
 const configuration = new Configuration({
@@ -189,14 +193,14 @@ function ApiRouting(req, res) {
                     let data = '';
                     req.on('data', chunk => data += chunk)
                     .on('end', async () => {
-                        if (data) {
-                             if(req.headers['content-type'] && req.headers['content-type'].indexOf('application/x-www-form-urlencoded') !== -1){
+                        if (data && req.headers['content-type']) {
+                             if(req.headers['content-type'].indexOf('application/x-www-form-urlencoded') !== -1){
                                 decodeURIComponent(data).split('&').forEach(out => {
                                     let key = out.split('=')[0].trim();
                                     let value = out.split('=')[1].replace(/\+/g, ' ').trim();
                                     POST[key] = value;
-                            });
-                            }else if(req.headers['content-type'] && req.headers['content-type'].indexOf('application/json') !== -1){
+                                });
+                            }else if(req.headers['content-type'].indexOf('application/json') !== -1){
                                 const json = JSON.parse(data);
                                 for(let key in json){
                                     POST[key] = json[key];
@@ -239,10 +243,6 @@ function ApiRouting(req, res) {
 //request
 function RouteSetting(req, res) {
     try {
-        const header_source = {
-            'Pragma': 'no-cache',
-            'Cache-Control': 'no-cache'
-        }
         const urldata = url.parse(req.url, true);
         const extname = String(path.extname(urldata.pathname)).toLowerCase();
         const dir = String(config['document_root'] + urldata.pathname);
@@ -343,15 +343,15 @@ function RouteSetting(req, res) {
 }
 
 async function openBrowser(url) {
-  const { default: open } = await import("open");
-  open(url).catch(err => {
+    const { default: open } = await import("open");
+    open(url).catch(err => {
     console.error("ブラウザを開けませんでした:", err);
-  });
+    });
 }
 
 async function gpt_render(question){
     let answer = {reply: ""};
-    const modify = "\n以上の内容でHTMLとCSSを一つにまとめてコードを書いてください";
+    const modify = "\n以上の内容でHTMLとCSSを一つにまとめてコードを出力してください。コード以外の説明は不要です。";
     try {
         if(question){
             answer['reply'] = question + modify;
@@ -376,14 +376,13 @@ async function gpt_render(question){
 
 function ejs_render(req, res, page) {
    try {
-        const COOKIE = get_cookie(req.headers['cookie']);
+        const COOKIE = sanitizeObject(get_cookie(req.headers['cookie']));
         const DEFINE = JSON.parse(fs.readFileSync(root_dir + 'etc/define.json', 'UTF-8'));
         DEFINE['response'] = res;
         DEFINE['gpt_port'] = config['GPT']['port'];
         
         const locals = {
-            COOKIE: sanitizeObject(COOKIE),
-            DEFINE,
+            COOKIE, DEFINE
         };
 
         page = ejs.render(page, locals);
