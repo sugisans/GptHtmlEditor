@@ -12,12 +12,7 @@ App page file = ./www/index.ejs
 
 
 **Set up gpt key to ./etc/config.json**
-"GPT": {
-        "port": 8080,                   set to API port
-        "temperature": 0.7,             set to temperature
-        "model": "gpt-4.1-mini",        set to gpt model
-        "key": ""                       set to API key
-}
+"GPT": { "key": "" }    //set to API key
 
 
 ![代替テキスト](img/example.jpg)
