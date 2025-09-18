@@ -10,9 +10,7 @@ Setting file = ./etc/config.json
 
 App page file = ./www/index.ejs
 
-**Create ChatGpt API key**
-
-https://openai.com/api
+Create ChatGpt API key = https://openai.com/api
 
 **Set up gpt key to ./etc/config.json**
 
