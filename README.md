@@ -12,7 +12,9 @@ App page file = ./www/index.ejs
 
 
 **Set up gpt key to ./etc/config.json**
+
 "GPT": { "key": "" }    //set to API key
+
 
 
 ![代替テキスト](img/example.jpg)
