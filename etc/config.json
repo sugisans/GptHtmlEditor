@@ -8,7 +8,7 @@
     "ssl_cert_file": "",
     "port": 3000,
     "GPT": {
-        "port": 3001,
+        "port": 8080,
         "temperature": 0.7,
         "model": "gpt-4.1-mini",
         "key": ""
