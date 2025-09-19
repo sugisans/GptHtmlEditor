@@ -184,8 +184,6 @@ function RouteSetting(req, res) {
         }
         
         if(urldata.pathname == '/api'){ //api routing   
-            const POST = [];
-            const GET = request_get(url.parse(req.url, true).search);
             let answer;
             if (req.method === 'OPTIONS') {
                 code = 204;
@@ -196,13 +194,14 @@ function RouteSetting(req, res) {
                 });
                 return res.end();
             }
-
+            
             if (req.method === 'POST') {
+                const POST = [];
                 let data = '';
                 req.on('data', chunk => data += chunk)
                 .on('end', async () => {
                     if (data && req.headers['content-type']) {
-                            if(req.headers['content-type'].indexOf('application/x-www-form-urlencoded') !== -1){
+                        if(req.headers['content-type'].indexOf('application/x-www-form-urlencoded') !== -1){
                             decodeURIComponent(data).split('&').forEach(out => {
                                 let key = out.split('=')[0].trim();
                                 let value = out.split('=')[1].replace(/\+/g, ' ').trim();
@@ -215,7 +214,6 @@ function RouteSetting(req, res) {
                             }
                         }
                     }
-                    
                     answer = await gpt_render(POST);
                     code = answer ? 200 : 400;
                     res.writeHead(code, {
@@ -225,6 +223,7 @@ function RouteSetting(req, res) {
                     res.end(answer);
                 });
             } else {
+                const GET = request_get(url.parse(req.url, true).search);
                 (async () => {
                     answer = await gpt_render(GET);
                     code = answer ? 200 : 400;
