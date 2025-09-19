@@ -330,7 +330,7 @@ async function gpt_render(REQUEST){
             const completion = await openai.createChatCompletion({
                 model: config['GPT']['model'],
                 messages: [
-                    { role: "system", content: "あなた優秀なHTML/CSSコーダーです。" },
+                    { role: "system", content: "あなた優秀なHTML/CSSコーダーです。履歴のコードをもとに上手に修正する事もできます。" },
                     { role: "user", content: question },
                     { role: "assistant", content: history }
                 ],
