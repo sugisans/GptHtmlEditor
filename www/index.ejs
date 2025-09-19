@@ -119,7 +119,7 @@
         const res = await fetch(apiEndpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ "message": prompt })
+          body: JSON.stringify({ "message": prompt, "html": htmlEditor.value, "css": cssEditor.value })
         });
 
         const data = await res.json();

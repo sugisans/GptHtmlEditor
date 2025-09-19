@@ -216,7 +216,7 @@ function RouteSetting(req, res) {
                         }
                     }
                     
-                    answer = await gpt_render(POST['message']);
+                    answer = await gpt_render(POST);
                     code = answer ? 200 : 400;
                     res.writeHead(code, {
                         'Content-Type': 'application/json',
@@ -226,7 +226,7 @@ function RouteSetting(req, res) {
                 });
             } else {
                 (async () => {
-                    answer = await gpt_render(GET['message']);
+                    answer = await gpt_render(GET);
                     code = answer ? 200 : 400;
                     res.writeHead(code, {
                         'Content-Type': 'application/json',
@@ -320,20 +320,20 @@ async function openBrowser(url) {
     });
 }
 
-async function gpt_render(question){
+async function gpt_render(REQUEST){
     let answer = {reply: ""};
     const modify = "\n以上の内容でHTMLとCSSを一つにまとめてコードを出力してください。コード以外の説明は不要です。";
     try {
-        if(question){
-            answer['reply'] = question + modify;
-            question = question + modify;
+        if(REQUEST && REQUEST['message']){
+            const question = REQUEST['message'] + modify;
+            const history = REQUEST['html'] && REQUEST['css'] ? `HTML:\n${REQUEST['html']}\n\nCSS:\n${REQUEST['css']}\n\n` : "";
             const openai = new OpenAIApi(configuration);
             const completion = await openai.createChatCompletion({
                 model: config['GPT']['model'],
                 messages: [
                     { role: "system", content: "あなた優秀なHTML/CSSコーダーです。" },
                     { role: "user", content: question },
-                    { role: "assistant", content: "" }
+                    { role: "assistant", content: history }
                 ],
                 temperature: config['GPT']['temperature'] || 0.7,
             });
