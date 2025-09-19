@@ -4,8 +4,6 @@ Execute = $node bin/app.js
 
 Default access = http://localhost:3000
 
-Default api access = http://localhost:8080
-
 Setting file = ./etc/config.json
 
 App page file = ./www/index.ejs

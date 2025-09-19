@@ -148,117 +148,34 @@ if (cluster.isMaster) {
             server.listen(process.env.PORT || port);
     }
 
-    if(config['port'] === config['GPT']['port'] || config['GPT']['port'] < 1024 ||  config['GPT']['port'] > 65535){
-        console.error(`API port error [1024-65535 and not same http port ${config['port']}]`);
-        process.exit(-1);
-    }
-    const api = http.createServer(ApiRouting);
-    api.listen(config['GPT']['port']);
-    console.log(`openAI API server port ${config['GPT']['port']}`);
-
     const msg = process.env.msg;
     process.send(`from worker (${msg})`);
     console.log(`PORT=${process.env.PORT || port}\n${config['title']} (${os}) running!`);
 }
 
-
 cluster.on('exit', function(worker, code, signal) {
     console.log('Worker %d died with code/signal %s. Restarting worker...', worker.process.pid, signal || code);
 });
-
-function ApiRouting(req, res) {
-    try{
-        const urldata = url.parse(req.url, true);
-        const POST = [];
-        const GET = request_get(url.parse(req.url, true).search);
-        let answer, code;
-
-        switch (urldata.pathname) {
-            case '/':
-                code = 200;
-                res.writeHead(code, { 'Content-Type': 'text/plain' });
-                res.end('openAI request server');
-                break;
-            case '/openai':
-                if (req.method === 'OPTIONS') {
-                    res.writeHead(204, {
-                        'Access-Control-Allow-Origin': '*',
-                        'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
-                        'Access-Control-Allow-Headers': 'Content-Type',
-                    });
-                    return res.end();
-                }
-
-                if (req.method === 'POST') {
-                    let data = '';
-                    req.on('data', chunk => data += chunk)
-                    .on('end', async () => {
-                        if (data && req.headers['content-type']) {
-                             if(req.headers['content-type'].indexOf('application/x-www-form-urlencoded') !== -1){
-                                decodeURIComponent(data).split('&').forEach(out => {
-                                    let key = out.split('=')[0].trim();
-                                    let value = out.split('=')[1].replace(/\+/g, ' ').trim();
-                                    POST[key] = value;
-                                });
-                            }else if(req.headers['content-type'].indexOf('application/json') !== -1){
-                                const json = JSON.parse(data);
-                                for(let key in json){
-                                    POST[key] = json[key];
-                                }
-                            }
-                        }
-                        
-                        answer = await gpt_render(POST['message']);
-                        code = answer ? 200 : 400;
-                        res.writeHead(code, {
-                            'Content-Type': 'application/json',
-                            'Access-Control-Allow-Origin': '*'
-                        });
-                        res.end(answer);
-                    });
-                } else {
-                    (async () => {
-                        answer = await gpt_render(GET['message']);
-                        code = answer ? 200 : 400;
-                        res.writeHead(code, {
-                            'Content-Type': 'application/json',
-                            'Access-Control-Allow-Origin': '*'
-                        });
-                        res.end(answer);
-                    })();
-                }
-                break;
-            default:
-                code = 404;
-                res.writeHead(code, { 'Content-Type': 'text/plain' });
-                res.end(code + ' Not Found');
-        }
-    }catch(e){
-        console.error(e.name);
-        res.writeHead(500, { 'Content-Type': 'text/plain' });
-        res.end('500 Internal Server Error');
-    }
-}
 
 //request
 function RouteSetting(req, res) {
     try {
         const urldata = url.parse(req.url, true);
         const extname = String(path.extname(urldata.pathname)).toLowerCase();
-        const dir = String(config['document_root'] + urldata.pathname);
         const ip = req.headers['x-forwarded-for'] ? String(req.headers['x-forwarded-for']).split(',', 2)[0] : req.socket['remoteAddress'];
         const ua = req.headers['user-agent'];
         const pid = process.pid;
         const time = new Date().toISOString();
-        const log_data = `[${time}] ${req.headers['host']} ${dir} <= ${ip} ${ua} PID=${pid}\n`;
+        const log_data = `[${time}] ${req.headers['host']} ${urldata.pathname} <= ${ip} ${ua} PID=${pid}\n`;
         let content_type = !extname ? 'text/html' : mime_type[extname] || 'text/plain';
         let encode = content_type.split('/', 2)[0] === 'text' ? 'UTF-8' : null;
+        let code = 200;
         
         if (config['CACHE']['status'] === "on") {
             header_source['Pragma'] = 'chache';
             header_source['Cache-Control'] = `max-age=${config['CACHE']['max_age']}`;
         }
-
+        
         if (config['LOG']['status'] === "on") {
             fs.appendFile(log_file, log_data, function(err) {
                 console.log(log_data);
@@ -266,72 +183,126 @@ function RouteSetting(req, res) {
             });
         }
         
-        fs.readdir(dir, function(err, files) {
-            let file, page;
-            let index = '';
-            let code = 200;
-            if (!err) { //dir
-                for (let get of files) {
-                    if (get == 'index.ejs') {
-                        index = get;
-                        break;
-                    }
-                    if (get == 'index.html') {
-                        index = get;
-                    }
-                }
-                if (urldata.pathname.slice(-1) != '/') {
-                    file = String(dir + '/' + index);
-                } else {
-                    file = String(dir + index);
-                }
-                
-                fs.readFile(file, encode, function(err, data) {
-                    if (!err) {
-                        if (index == 'index.ejs') {
-                            if (ejs_render(req, res, data)) return;
-                            code = 400;
-                            page = status_page(code);
-                        } else {
-                            page = data;
-                        }
-                    } else if (urldata.pathname == '/') { //top dir
-                        page = ejs.render(indexEjs, { config, dir });
-                    } else {
-                        code = 403;
-                        page = status_page(code);
-                    }
-
-                    res.writeHead(code, { 'Content-Type': 'text/html' });
-                    res.end(page);
+        if(urldata.pathname == '/api'){ //api routing   
+            const POST = [];
+            const GET = request_get(url.parse(req.url, true).search);
+            let answer;
+            if (req.method === 'OPTIONS') {
+                code = 204;
+                res.writeHead(code, {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+                    'Access-Control-Allow-Headers': 'Content-Type',
                 });
-            } else { //not dir
-                file = dir;
-                fs.readFile(file, encode, function(err, data) {
-                    if (!err) {
-                        if (content_type == 'text/html' && extname == '.ejs') { //.ejs
-                            if (ejs_render(req, res, data)) return;
-                            code = 400;
-                            page = status_page(code);
-                        } else {
-                            page = data;
-                        }
-                    } else if (err.code === 'ENOENT') { //not page
-                        content_type = 'text/html';
-                        code = 404;
-                        page = status_page(code);
-                    } else {
-                        content_type = 'text/html';
-                        code = 400;
-                        page = status_page(code);
-                    }
-
-                    header_source['Content-Type'] = content_type;
-                    res.writeHead(code, header_source);
-                    res.end(page);
-                });
+                return res.end();
             }
-        });
+
+            if (req.method === 'POST') {
+                let data = '';
+                req.on('data', chunk => data += chunk)
+                .on('end', async () => {
+                    if (data && req.headers['content-type']) {
+                            if(req.headers['content-type'].indexOf('application/x-www-form-urlencoded') !== -1){
+                            decodeURIComponent(data).split('&').forEach(out => {
+                                let key = out.split('=')[0].trim();
+                                let value = out.split('=')[1].replace(/\+/g, ' ').trim();
+                                POST[key] = value;
+                            });
+                        }else if(req.headers['content-type'].indexOf('application/json') !== -1){
+                            const json = JSON.parse(data);
+                            for(let key in json){
+                                POST[key] = json[key];
+                            }
+                        }
+                    }
+                    
+                    answer = await gpt_render(POST['message']);
+                    code = answer ? 200 : 400;
+                    res.writeHead(code, {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': '*'
+                    });
+                    res.end(answer);
+                });
+            } else {
+                (async () => {
+                    answer = await gpt_render(GET['message']);
+                    code = answer ? 200 : 400;
+                    res.writeHead(code, {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': '*'
+                    });
+                    res.end(answer);
+                })();
+            }
+        }else{ //page routing
+            const dir = String(config['document_root'] + urldata.pathname);
+            fs.readdir(dir, function(err, files) {
+                let file, page;
+                let index = '';
+                if (!err) { //dir
+                    for (let get of files) {
+                        if (get == 'index.ejs') {
+                            index = get;
+                            break;
+                        }
+                        if (get == 'index.html') {
+                            index = get;
+                        }
+                    }
+                    if (urldata.pathname.slice(-1) != '/') {
+                        file = String(dir + '/' + index);
+                    } else {
+                        file = String(dir + index);
+                    }
+                    
+                    fs.readFile(file, encode, function(err, data) {
+                        if (!err) {
+                            if (index == 'index.ejs') {
+                                if (ejs_render(req, res, data)) return;
+                                code = 400;
+                                page = status_page(code);
+                            } else {
+                                page = data;
+                            }
+                        } else if (urldata.pathname == '/') { //top dir
+                            page = ejs.render(indexEjs, { config, dir });
+                        } else {
+                            code = 403;
+                            page = status_page(code);
+                        }
+    
+                        res.writeHead(code, { 'Content-Type': 'text/html' });
+                        res.end(page);
+                    });
+                } else { //not dir
+                    file = dir;
+                    fs.readFile(file, encode, function(err, data) {
+                        if (!err) {
+                            if (content_type == 'text/html' && extname == '.ejs') { //.ejs
+                                if (ejs_render(req, res, data)) return;
+                                code = 400;
+                                page = status_page(code);
+                            } else {
+                                page = data;
+                            }
+                        } else if (err.code === 'ENOENT') { //not page
+                            content_type = 'text/html';
+                            code = 404;
+                            page = status_page(code);
+                        } else {
+                            content_type = 'text/html';
+                            code = 400;
+                            page = status_page(code);
+                        }
+    
+                        header_source['Content-Type'] = content_type;
+                        res.writeHead(code, header_source);
+                        res.end(page);
+                    });
+                }
+            });
+        }
     } catch (e) {
         console.error(e.name);
         if (!res.headersSent) { 
@@ -360,8 +331,9 @@ async function gpt_render(question){
             const completion = await openai.createChatCompletion({
                 model: config['GPT']['model'],
                 messages: [
-                    { role: "system", content: "あなたはHTML/CSSコーダーです" },
-                    { role: "user", content: question }
+                    { role: "system", content: "あなた優秀なHTML/CSSコーダーです。" },
+                    { role: "user", content: question },
+                    { role: "assistant", content: "" }
                 ],
                 temperature: config['GPT']['temperature'] || 0.7,
             });
