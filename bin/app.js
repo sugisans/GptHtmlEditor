@@ -21,10 +21,6 @@ let config = JSON.parse(configFile);
 const mime_type = JSON.parse(mimeFile);
 const status_code = JSON.parse(statusFile);
 const os = process.platform;
-const header_source = {
-    'Pragma': 'no-cache',
-    'Cache-Control': 'no-cache'
-}
 
 //api value
 const configuration = new Configuration({
@@ -160,6 +156,11 @@ cluster.on('exit', function(worker, code, signal) {
 //request
 function RouteSetting(req, res) {
     try {
+        const header_source = {
+            'Pragma': 'no-cache',
+            'Cache-Control': 'no-cache',
+            'Access-Control-Allow-Origin': '*'
+        }   
         const urldata = url.parse(req.url, true);
         const extname = String(path.extname(urldata.pathname)).toLowerCase();
         const ip = req.headers['x-forwarded-for'] ? String(req.headers['x-forwarded-for']).split(',', 2)[0] : req.socket['remoteAddress'];
@@ -185,13 +186,12 @@ function RouteSetting(req, res) {
         
         if(urldata.pathname == '/api'){ //api routing   
             let answer;
+            header_source['Content-Type'] = 'application/json';
             if (req.method === 'OPTIONS') {
                 code = 204;
-                res.writeHead(code, {
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
-                    'Access-Control-Allow-Headers': 'Content-Type',
-                });
+                header_source['Access-Control-Allow-Methods'] = 'POST, GET, OPTIONS';
+                header_source['Access-Control-Allow-Headers'] = 'Content-Type';
+                res.writeHead(code, header_source);
                 return res.end();
             }
             
@@ -216,10 +216,7 @@ function RouteSetting(req, res) {
                     }
                     answer = await gpt_render(POST);
                     code = answer ? 200 : 400;
-                    res.writeHead(code, {
-                        'Content-Type': 'application/json',
-                        'Access-Control-Allow-Origin': '*'
-                    });
+                    res.writeHead(code, header_source);
                     res.end(answer);
                 });
             } else {
@@ -227,10 +224,7 @@ function RouteSetting(req, res) {
                 (async () => {
                     answer = await gpt_render(GET);
                     code = answer ? 200 : 400;
-                    res.writeHead(code, {
-                        'Content-Type': 'application/json',
-                        'Access-Control-Allow-Origin': '*'
-                    });
+                    res.writeHead(code, header_source);
                     res.end(answer);
                 })();
             }
@@ -258,7 +252,7 @@ function RouteSetting(req, res) {
                     fs.readFile(file, encode, function(err, data) {
                         if (!err) {
                             if (index == 'index.ejs') {
-                                if (ejs_render(req, res, data)) return;
+                                if (ejs_render(req, res, data, header_source)) return;
                                 code = 400;
                                 page = status_page(code);
                             } else {
@@ -270,8 +264,9 @@ function RouteSetting(req, res) {
                             code = 403;
                             page = status_page(code);
                         }
-    
-                        res.writeHead(code, { 'Content-Type': 'text/html' });
+                        
+                        header_source['Content-Type'] = 'text/html';
+                        res.writeHead(code, header_source);
                         res.end(page);
                     });
                 } else { //not dir
@@ -279,7 +274,7 @@ function RouteSetting(req, res) {
                     fs.readFile(file, encode, function(err, data) {
                         if (!err) {
                             if (content_type == 'text/html' && extname == '.ejs') { //.ejs
-                                if (ejs_render(req, res, data)) return;
+                                if (ejs_render(req, res, data, header_source)) return;
                                 code = 400;
                                 page = status_page(code);
                             } else {
@@ -345,7 +340,7 @@ async function gpt_render(REQUEST){
     }
 }
 
-function ejs_render(req, res, page) {
+function ejs_render(req, res, page, HEADER) {
    try {
         const COOKIE = sanitizeObject(get_cookie(req.headers['cookie']));
         const DEFINE = JSON.parse(fs.readFileSync(root_dir + 'etc/define.json', 'UTF-8'));
@@ -356,8 +351,9 @@ function ejs_render(req, res, page) {
             COOKIE, DEFINE
         };
 
+        HEADER['Content-Type'] = 'text/html';
         page = ejs.render(page, locals);
-        res.writeHead(200, { 'Content-Type': 'text/html' });
+        res.writeHead(200, HEADER);
         res.end(page);
         return true;
     } catch (e) {
