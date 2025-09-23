@@ -12,7 +12,11 @@ Create ChatGpt API key = https://openai.com/api
 
 **Set up gpt key to ./etc/config.json**
 
-"GPT": { "key": "" }    //set to API key
+"GPT": { "key": "set to API key" }  
+
+or
+
+$export OPENAI_API_KEY="set to API key"
 
 
 
