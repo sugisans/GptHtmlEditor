@@ -318,14 +318,14 @@ function RouteSetting(req, res) {
 async function openBrowser(url) {
     const { default: open } = await import("open");
     open(url).catch(err => {
-    console.error("ブラウザを開けませんでした:", err);
+        console.error("ブラウザを開けませんでした:", err);
     });
 }
 
 async function gpt_render(REQUEST){
-    let answer = {reply: ""};
-    const modify = "\n以上の内容でHTMLとCSSを一つにまとめてコードを出力してください。コード以外の説明は不要です。";
     try {
+        let answer = {reply: ""};
+        const modify = "\n以上の内容でHTMLとCSSを一つにまとめてコードを出力してください。コード以外の説明は不要です。";
         if(REQUEST && REQUEST['message']){
             const question = REQUEST['message'] + modify;
             const history = REQUEST['html'] && REQUEST['css'] ? `HTML:\n${REQUEST['html']}\n\nCSS:\n${REQUEST['css']}\n\n` : "";
@@ -353,7 +353,6 @@ function ejs_render(req, res, page) {
         const COOKIE = sanitizeObject(get_cookie(req.headers['cookie']));
         const DEFINE = JSON.parse(fs.readFileSync(root_dir + 'etc/define.json', 'UTF-8'));
         DEFINE['response'] = res;
-        DEFINE['gpt_port'] = config['GPT']['port'];
         
         const locals = {
             COOKIE, DEFINE
