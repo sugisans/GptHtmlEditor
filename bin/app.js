@@ -188,9 +188,10 @@ function RouteSetting(req, res) {
         }
         if (config['LOG']['status'] === "on") {
             fs.appendFile(log_file, log_data, function(err) {
-                console.log(log_data);
                 if (err) console.error("log write error");
             });
+        }else{
+            console.log(log_data);
         }
         
         if(urldata.pathname == '/api'){ //api routing   
