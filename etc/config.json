@@ -1,7 +1,7 @@
 {
     "title": "gpt html editor",
     "version": "v1.0",
-    "browser": "on",
+    "browser": "off",
     "document_root": "",
     "system_user": "",
     "ssl_key_file": "",

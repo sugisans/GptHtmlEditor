@@ -41,6 +41,16 @@ for (let i = 2; i < process.argv.length; i += 2) {
                 process.exit(0);
             }
             break;
+        case '-b':
+        case '--browser':
+            value = String(value);
+            if (value === 'on' || value === 'off') {
+                config['browser'] = value;
+            } else {
+                console.log("open browser value is on or off");
+                process.exit(0);
+            }   
+            break;
         case '-l':
         case '--log':
             value = String(value);
@@ -73,6 +83,7 @@ for (let i = 2; i < process.argv.length; i += 2) {
         default:
             console.log(`${config['title']} httpd.js options`);
             console.log("-p, --port [80 or 443 or 1024-65535]");
+            console.log("-b, --browser[open browser is on or off]");
             console.log("-l, --log [log validate is on or off]");
             console.log("-s, --show [config, define]");
             console.log("-v, --version : version check");
