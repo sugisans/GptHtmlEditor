@@ -11,7 +11,6 @@ App page file = ./www/index.ejs
 Create ChatGpt API key = https://openai.com/api
 
 **Set up gpt key to ./etc/config.json**
-
 "GPT": { "key": "set to API key" }  
 
 or
