@@ -24,7 +24,7 @@ const os = process.platform;
 
 //api value
 const configuration = new Configuration({
-    apiKey:  process.env.OPENAI_API_KEY || config['GPT']['key'] 
+    apiKey: process.env.OPENAI_API_KEY || config['GPT']['key'] 
 });
 
 //config option
