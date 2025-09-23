@@ -6,7 +6,7 @@ Default access = http://localhost:3000
 
 Setting file = ./etc/config.json
 
-App page file = ./www/index.ejs
+App page file = ./www/index.html
 
 Create ChatGpt API key = https://openai.com/api
 
