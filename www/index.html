@@ -28,18 +28,21 @@
     input[type=text]{padding:6px;border-radius:6px;border:1px solid rgba(255,255,255,0.06);background:#071127;color:white}
     #openNewTab{flex:1}
     
-    .fullscreen-editor {
+   .fullscreen-editor {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      inset: 0;
       background: #0b1220;
-      z-index: 9999;
       display: flex;
       flex-direction: column;
+      z-index: 9999;
       padding: 10px;
-      box-sizing: border-box;
+    }
+
+    .fullscreen-header {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
     }
 
     .fullscreen-editor textarea {
@@ -47,26 +50,22 @@
       width: 100%;
       height: 100%;
       resize: none;
-      background: #111a2c;
-      color: white;
-      border: none;
-      outline: none;
-      border-radius: 8px;
       font-family: Menlo, monospace;
       font-size: 14px;
+      background: #1e293b;
+      color: white;
+      border: 1px solid #334155;
+      border-radius: 8px;
       padding: 10px;
     }
 
-    .fullscreen-editor button.close-btn {
-      align-self: flex-end;
-      margin-bottom: 10px;
-      padding: 6px 12px;
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 6px;
-      color: white;
-      cursor: pointer;
-    }
+     .fullscreen-editor div{
+       color:#e6eef8;
+       font-family: Menlo, monospace;
+       font-weight:900;
+       font-size: 16px;
+       padding: 8px;
+     }
 
     #sandboxContainer {
       position: fixed;
@@ -167,10 +166,6 @@
         width:100%;
         height:600px;
       }
-
-      .fullscreen-editor button.close-btn {
-         flex:0;
-    }
 }
   </style>
 </head>
@@ -191,8 +186,8 @@
         </div>
         
         <div class="tabs">
-          <div class="tab">HTML View</div>
-          <div class="tab">CSS View</div>
+          <div class="tab">HTML Viewer</div>
+          <div class="tab">CSS Viewer</div>
         </div>
 
       <div class="row controls">
@@ -271,14 +266,6 @@
           </head>
           <body>
             ${html}
-            <script>
-              document.querySelectorAll("a").forEach(a => {
-                a.addEventListener("click", e => {
-                  e.preventDefault();
-                  alert("リンクは無効化されています");
-                });
-              });
-            <\/script>
           </body>
         </html>`;
 
@@ -294,34 +281,69 @@
       sandboxFrame.srcdoc = ""; // 中身をクリア
     });
 
-    tabs.forEach(tab => {
+   tabs.forEach(tab => {
       tab.addEventListener('click', () => {
         const isHTML = tab.textContent.match(/^html/i);
         const targetEditor = isHTML ? htmlEditor : cssEditor;
-        console.log(targetEditor.value);
 
         // 全画面コンテナを作成
         const fullscreen = document.createElement('div');
         fullscreen.classList.add('fullscreen-editor');
 
+        // ヘッダーバー
+        const header = document.createElement('div');
+        header.classList.add('fullscreen-header');
+
+        const title = document.createElement('div');
+        title.textContent = tab.textContent;
+
         // 閉じるボタン
         const closeBtn = document.createElement('button');
-        closeBtn.textContent = `${tab.textContent} 閉じる ✕`;
+        closeBtn.textContent = "閉じる ✕";
         closeBtn.classList.add('close-btn');
 
-        // テキストエリアをクローンして配置
+        // テキストエリアをクローン
         const clone = targetEditor.cloneNode(true);
 
-        fullscreen.appendChild(closeBtn);
+        // 戻るボタン
+        const undoBtnFs = document.createElement('button');
+        undoBtnFs.textContent = "戻る";
+        undoBtnFs.addEventListener("click", () => {
+          clone.focus();
+          document.execCommand("undo");
+        });
+
+        // やり直しボタン
+        const redoBtnFs = document.createElement('button');
+        redoBtnFs.textContent = "やり直し";
+        redoBtnFs.addEventListener("click", () => {
+          clone.focus();
+          document.execCommand("redo");
+        });
+
+        // 保存ボタン（既存保存処理を利用）
+        const saveBtnFs = document.createElement('button');
+        saveBtnFs.textContent = "保存";
+        saveBtnFs.addEventListener("click", () => {
+          targetEditor.value = clone.value; // 反映してから保存処理
+          saveLocalBtn.click();
+        });
+
+        // ボタンを並べる
+        header.appendChild(undoBtnFs);
+        header.appendChild(redoBtnFs);
+        header.appendChild(saveBtnFs);
+        header.appendChild(closeBtn);
+        
+        fullscreen.appendChild(title);
+        fullscreen.appendChild(header);
         fullscreen.appendChild(clone);
         document.body.appendChild(fullscreen);
 
         // 閉じる処理
         closeBtn.addEventListener('click', () => {
           document.body.removeChild(fullscreen);
-
-          // 編集内容を反映（元のtextareaにコピー）
-          targetEditor.value = clone.value;
+          targetEditor.value = clone.value; // 内容を反映
         });
       });
     });
