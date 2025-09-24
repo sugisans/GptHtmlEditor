@@ -13,6 +13,7 @@
     textarea{width:100%;min-height:500px;resize:both;background:var(--panel-bg);border:1px solid rgba(255,255,255,0.06);color:#e6eef8;padding:10px;border-radius:8px;font-family:Menlo,monospace;font-size:13px}
     .tabs{display:flex;gap:6px}
     .tab{padding:6px 10px;background:#071127;border-radius:6px;cursor:pointer;color:var(--muted)}
+    .tab:hover{color:#e6eef8}
     .tab.active{background:#0d1a2b;color:white}
     .controls{display:flex;gap:8px;align-items:center}
     button{background:#062037;color:white;border:1px solid rgba(255,255,255,0.06);padding:8px 10px;border-radius:8px;cursor:pointer}
@@ -25,6 +26,84 @@
     .note{color:var(--muted);font-size:13px}
     .row{display:flex;gap:8px;align-items:center}
     input[type=text]{padding:6px;border-radius:6px;border:1px solid rgba(255,255,255,0.06);background:#071127;color:white}
+    #openNewTab{flex:1}
+    
+    .fullscreen-editor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #0b1220;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+
+    .fullscreen-editor textarea {
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      resize: none;
+      background: #111a2c;
+      color: white;
+      border: none;
+      outline: none;
+      border-radius: 8px;
+      font-family: Menlo, monospace;
+      font-size: 14px;
+      padding: 10px;
+    }
+
+    .fullscreen-editor button.close-btn {
+      align-self: flex-end;
+      margin-bottom: 10px;
+      padding: 6px 12px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 6px;
+      color: white;
+      cursor: pointer;
+    }
+
+    #sandboxContainer {
+      position: fixed;
+      inset: 0;
+      background: #0f172a;
+      display: flex;
+      flex-direction: column;
+      z-index: 9999;
+    }
+
+    #sandboxContainer.hidden {
+      display: none;
+    }
+
+    .sandbox-header {
+      display: flex;
+      justify-content: flex-end;
+      padding: 10px;
+    }
+
+    .sandbox-header button {
+      padding: 6px 12px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 6px;
+      color: white;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    /* iframe は残り全体を使用 */
+    .sandbox-frame {
+      flex: 1;
+      border: none;
+      width: 100%;
+      height: 100%;
+    }
 
     @media (max-width: 768px) {
       .app {
@@ -48,11 +127,6 @@
         order: 2; /* 上に表示 */
       }
 
-      .row+.controls{
-        flex-direction: column;
-        align-items: stretch;
-      }
-
       input[type=text] {
         width: 100%;
       }
@@ -64,6 +138,8 @@
 
       .controls {
         flex-wrap: wrap;
+        flex-direction: column;
+        align-items: stretch;
       }
 
       .note {
@@ -91,9 +167,11 @@
         width:100%;
         height:600px;
       }
-}
 
-    
+      .fullscreen-editor button.close-btn {
+         flex:0;
+    }
+}
   </style>
 </head>
 <body>
@@ -113,8 +191,8 @@
         </div>
         
         <div class="tabs">
-          <div class="tab active">HTML</div>
-          <div class="tab">CSS</div>
+          <div class="tab">HTML View</div>
+          <div class="tab">CSS View</div>
         </div>
 
       <div class="row controls">
@@ -140,9 +218,13 @@
 
     <div class="right">
       <div class="row">
-        <div class="note">プレビュー</div>
-        <div style="flex:1"></div>
-        <button id="openNewTab">新しいタブで開く</button>
+       <button id="openNewTab">プレビュー</button>
+        <div id="sandboxContainer" class="hidden">
+          <div class="sandbox-header">
+            <button id="closeSandbox">閉じる</button>
+          </div>
+          <iframe id="sandboxFrame" sandbox="allow-same-origin" class="sandbox-frame"></iframe>
+        </div>
       </div>
       <div class="iframe-wrap">
         <iframe id="preview" sandbox="allow-scripts allow-forms"></iframe>
@@ -152,6 +234,8 @@
   </div>
 
   <script>
+    const apiEndpoint = '/api';
+
     // Elements
     const htmlEditor = document.getElementById('htmlEditor');
     const cssEditor = document.getElementById('cssEditor');
@@ -165,11 +249,67 @@
     const saveList = document.getElementById('saveList');
     const saveName = document.getElementById('saveName');
     const openNewTab = document.getElementById('openNewTab');
-
     const gptPrompt = document.getElementById('gptPrompt');
     const gptBtn = document.getElementById('gptBtn');
+    const tabs = document.querySelectorAll('.tabs .tab');
 
-    const apiEndpoint = '/api';
+    const sandboxContainer = document.getElementById("sandboxContainer");
+    const sandboxFrame = document.getElementById("sandboxFrame");
+    const closeSandbox = document.getElementById("closeSandbox");
+
+    openNewTab.addEventListener('click', () => {
+      const content = `
+        <!doctype html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <style>${cssEditor.value}</style>
+          </head>
+          <body>${htmlEditor.value}</body>
+        </html>`;
+
+      // iframe に安全に書き込み
+      sandboxFrame.srcdoc = content;
+
+      // 表示
+      sandboxContainer.classList.remove("hidden");
+    });
+
+    closeSandbox.addEventListener('click', () => {
+      sandboxContainer.classList.add("hidden");
+      sandboxFrame.srcdoc = ""; // 中身をクリア
+    });
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const isHTML = tab.textContent === 'HTML';
+        const targetEditor = isHTML ? htmlEditor : cssEditor;
+
+        // 全画面コンテナを作成
+        const fullscreen = document.createElement('div');
+        fullscreen.classList.add('fullscreen-editor');
+
+        // 閉じるボタン
+        const closeBtn = document.createElement('button');
+        closeBtn.textContent = `${tab.textContent}閉じる ✕`;
+        closeBtn.classList.add('close-btn');
+
+        // テキストエリアをクローンして配置
+        const clone = targetEditor.cloneNode(true);
+
+        fullscreen.appendChild(closeBtn);
+        fullscreen.appendChild(clone);
+        document.body.appendChild(fullscreen);
+
+        // 閉じる処理
+        closeBtn.addEventListener('click', () => {
+          document.body.removeChild(fullscreen);
+
+          // 編集内容を反映（元のtextareaにコピー）
+          targetEditor.value = clone.value;
+        });
+      });
+    });
 
 
     // History for undo/redo
@@ -332,28 +472,7 @@
     saveToListBtn.addEventListener('click', ()=>{ saveSnapshot(); });
     downloadBtn.addEventListener('click', ()=>{ downloadHTML(); });
     saveLocalBtn.addEventListener('click', ()=>{ saveWorkspaceToLocal(); alert('ワークスペースをローカルに保存しました'); });
-    openNewTab.addEventListener('click', ()=>{
-      const content = `<!doctype html><html><head><meta charset="utf-8"><style>${cssEditor.value}</style></head><body>${htmlEditor.value}</body></html>`;
-      const w = window.open(); if (w) { w.document.write(content); w.document.close(); } else alert('ポップアップブロッカーで開けませんでした');
-    });
-
-    // Tab switching (visual only)
-    document.querySelectorAll('.tab').forEach(t=>{
-      t.addEventListener('click', ()=>{
-        document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
-        t.classList.add('active');
-        if (t.dataset.target === 'html'){
-          htmlEditor.style.display = '';
-          cssEditor.style.display = 'block';
-          htmlEditor.style.flex = '1';
-          cssEditor.style.width = '320px';
-        } else {
-          htmlEditor.style.display = '';
-          cssEditor.style.display = '';
-        }
-      });
-    });
-
+   
     // Input handlers
     htmlEditor.addEventListener('input', ()=>{ schedulePushHistory(); renderPreview(); });
     cssEditor.addEventListener('input', ()=>{ schedulePushHistory(); renderPreview(); });
