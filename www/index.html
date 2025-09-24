@@ -233,7 +233,7 @@
 
   </div>
 
-  <script>
+  <script async>
     const apiEndpoint = '/api';
 
     // Elements
@@ -258,14 +258,28 @@
     const closeSandbox = document.getElementById("closeSandbox");
 
     openNewTab.addEventListener('click', () => {
-      const content = `
+      let html = htmlEditor.value;
+      let css = cssEditor.value;
+      html = html.replace(/<a\b([^>]*)href=["'][^"']*["']([^>]*)>/gi, '<a$1href="/404"$2>');
+
+      const content =`
         <!doctype html>
         <html>
           <head>
             <meta charset="utf-8">
-            <style>${cssEditor.value}</style>
+            <style>${css}</style>
           </head>
-          <body>${htmlEditor.value}</body>
+          <body>
+            ${html}
+            <script>
+              document.querySelectorAll("a").forEach(a => {
+                a.addEventListener("click", e => {
+                  e.preventDefault();
+                  alert("リンクは無効化されています");
+                });
+              });
+            <\/script>
+          </body>
         </html>`;
 
       // iframe に安全に書き込み
@@ -282,8 +296,9 @@
 
     tabs.forEach(tab => {
       tab.addEventListener('click', () => {
-        const isHTML = tab.textContent === 'HTML';
+        const isHTML = tab.textContent.match(/^html/i);
         const targetEditor = isHTML ? htmlEditor : cssEditor;
+        console.log(targetEditor.value);
 
         // 全画面コンテナを作成
         const fullscreen = document.createElement('div');
@@ -390,9 +405,28 @@
 
     // Render iframe using srcdoc
     function renderPreview(){
-      const doc = `<!doctype html><html><head><meta charset="utf-8"><style>${cssEditor.value}</style></head><body>${htmlEditor.value}</body></html>`;
-      // Use srcdoc for simplicity
-      preview.srcdoc = doc;
+      const doc = `
+        <!doctype html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <style>${cssEditor.value}</style>
+          </head>
+          <body>
+            ${htmlEditor.value}
+            <script>
+              document.addEventListener("DOMContentLoaded", () => {
+                document.querySelectorAll("a").forEach(a => {
+                  a.addEventListener("click", e => {
+                    e.preventDefault();
+                    alert("リンクは無効化されています");
+                  });
+                });
+              });
+            <\/script>
+          </body>
+        </html>`;
+       preview.srcdoc = doc;
     }
 
     // localStorage keys
