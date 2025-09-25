@@ -492,7 +492,9 @@
         if(styleMatch) cssEditor.value = styleMatch[1].trim();
         pushHistory();
         renderPreview();
-        textarea_resize(gptPrompt);
+        
+        gptPrompt.value = null;
+        textarea_resize(gptPrompt + promptModify);
       } catch (err) {
         alert("リクエスト失敗: " + err.message);
       } finally {
