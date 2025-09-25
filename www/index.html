@@ -691,7 +691,6 @@
     setTimeout(() => {
         id.style.minHeight = 0;
         id.style.minHeight = (id.scrollHeight - num) + "px";
-        console.log(id.scrollHeight);
     }, 100);
   }
 
@@ -700,6 +699,7 @@
     message.setAttribute('open', true);
     message.id = "msg";
     message.style.zIndex = 1;
+    message.style.top =  document.documentElement.scrollHeight / 2 + "px";
     message.textContent = String(text) || "";
     if (!element) {
         element = document.body;
