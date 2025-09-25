@@ -493,8 +493,8 @@
         pushHistory();
         renderPreview();
         
-        gptPrompt.value = null;
-        textarea_resize(gptPrompt + promptModify);
+        gptPrompt.value = "";
+        textarea_resize(gptPrompt, promptModify);
       } catch (err) {
         alert("リクエスト失敗: " + err.message);
       } finally {
