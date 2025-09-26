@@ -20,7 +20,7 @@
     button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06)}
     .right{display:flex;flex-direction:column;gap:8px}
     .iframe-wrap{flex:1;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.06)}
-    iframe{width:100%;height:100%;border:0;background:white}
+    iframe{width:100%;height:100%;border:0;background:white;}
     .save-list{max-height:140px;overflow:auto;background:#071127;padding:8px;border-radius:8px}
     .save-item{display:flex;justify-content:space-between;padding:6px;border-radius:6px}
     .note{color:var(--muted);font-size:13px}
@@ -374,7 +374,10 @@
     openNewTab.addEventListener('click', () => {
       let html = htmlEditor.value;
       let css = cssEditor.value;
-      html = html.replace(/<a\b([^>]*)href=["'][^"']*["']([^>]*)>/gi, '<a$1href="/404"$2>');
+      html = html.replace(
+        /<a\b([^>]*)href=["'][^"']*["']([^>]*)>/gi,
+        '<a$1href="javascript:void(0)"$2>'
+      );
 
       const content =`
         <!doctype html>
