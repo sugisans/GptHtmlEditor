@@ -53,7 +53,7 @@
       background: #0b1220;
       display: flex;
       flex-direction: column;
-      z-index: 9999;
+      z-index: 100;
       padding: 10px;
     }
 
@@ -92,7 +92,7 @@
       background: #0f172a;
       display: flex;
       flex-direction: column;
-      z-index: 9999;
+      z-index: 100;
     }
 
     #sandboxContainer.hidden {
@@ -143,6 +143,8 @@
 
       .editors {
         flex-direction: column; /* HTMLとCSSを縦並び */
+        visibility: hidden;
+        height: 0;
       }
 
       textarea {
@@ -174,6 +176,7 @@
 
       .note {
         visibility: hidden;
+        height: 0;
       }
 
       .row{
@@ -443,6 +446,7 @@
         saveBtnFs.addEventListener("click", () => {
           targetEditor.value = clone.value; // 反映してから保存処理
           saveLocalBtn.click();
+          messageViewer('保存しました (localStorage)');
         });
 
         // ボタンを並べる
@@ -460,6 +464,7 @@
         closeBtn.addEventListener('click', () => {
           document.body.removeChild(fullscreen);
           targetEditor.value = clone.value; // 内容を反映
+          renderBtn.click();
         });
       });
     });
@@ -699,7 +704,7 @@
     let message = document.createElement('dialog');
     message.setAttribute('open', true);
     message.id = "msg";
-    message.style.zIndex = 1;
+    message.style.zIndex = 1000;
     message.textContent = String(text) || "";
     if (!element) {
         element = document.body;
