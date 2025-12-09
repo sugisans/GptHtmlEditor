@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="ja">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -146,27 +147,27 @@
     }
 
 
-    #gptPrompt{
-      flex:1;
+    #gptPrompt {
+      flex: 1;
       display: inline-block;
-      padding:6px;
+      padding: 6px;
       border-radius: 6px;
-      border: 1px solid rgba(255,255,255,0.06);
-      background:#071127;
-      color:white;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: #071127;
+      color: white;
       font-size: 100%;
       width: 100%;
-      min-height:0;
+      min-height: 0;
       resize: none;
       -ms-overflow-style: none;
       scrollbar-width: none;
     }
 
-    #gptPrompt::-webkit-scrollbar{
-      display:none;
-    } 
-    
-   .fullscreen-editor {
+    #gptPrompt::-webkit-scrollbar {
+      display: none;
+    }
+
+    .fullscreen-editor {
       position: fixed;
       inset: 0;
       background: #0b1220;
@@ -197,13 +198,13 @@
       padding: 10px;
     }
 
-     .fullscreen-editor div{
-       color:#e6eef8;
-       font-family: Menlo, monospace;
-       font-weight:900;
-       font-size: 16px;
-       padding: 8px;
-     }
+    .fullscreen-editor div {
+      color: #e6eef8;
+      font-family: Menlo, monospace;
+      font-weight: 900;
+      font-size: 16px;
+      padding: 8px;
+    }
 
     #sandboxContainer {
       position: fixed;
@@ -252,30 +253,35 @@
       text-align: center;
       background-color: rgba(0, 0, 0, 0.6);
       color: #ffffff;
-  }
+    }
 
     @media (max-width: 768px) {
       .app {
-        grid-template-columns: 1fr; /* 1カラムに */
+        grid-template-columns: 1fr;
+        /* 1カラムに */
         grid-template-rows: auto auto;
       }
 
       .editors {
-        flex-direction: column; /* HTMLとCSSを縦並び */
+        flex-direction: column;
+        /* HTMLとCSSを縦並び */
         visibility: hidden;
         height: 0;
       }
 
       textarea {
-        min-height: 180px; /* スマホ向けに少し小さく */
+        min-height: 180px;
+        /* スマホ向けに少し小さく */
       }
 
       .right {
-        order: 1; /* 下に表示 */
+        order: 1;
+        /* 下に表示 */
       }
 
       .left {
-        order: 2; /* 上に表示 */
+        order: 2;
+        /* 上に表示 */
       }
 
       input[type=text] {
@@ -298,31 +304,37 @@
         height: 0;
       }
 
-      .row{
+      .row {
         display: flex;
         gap: 8px;
         align-items: center;
-        flex-wrap: nowrap; /* ← 折り返さない */
+        flex-wrap: nowrap;
+        /* ← 折り返さない */
       }
 
       #gptPrompt {
-        flex: 1; /* ← 入力欄が余ったスペースを使う */
-        min-width: 70%; /* ← スマホでも無理に広がらない */
+        flex: 1;
+        /* ← 入力欄が余ったスペースを使う */
+        min-width: 70%;
+        /* ← スマホでも無理に広がらない */
       }
 
       #gptBtn {
-        flex-shrink: 0; /* ← ボタン幅を維持して折り返さない */
-        white-space: nowrap; /* ← ボタン文字を改行させない */
+        flex-shrink: 0;
+        /* ← ボタン幅を維持して折り返さない */
+        white-space: nowrap;
+        /* ← ボタン文字を改行させない */
       }
 
-      iframe{
-        width:100%;
-        height:600px;
+      iframe {
+        width: 100%;
+        height: 600px;
       }
 
-}
+    }
   </style>
 </head>
+
 <body>
   <div class="app">
     <div class="left">
@@ -336,19 +348,19 @@
           &lt;p&gt;これはエディタのプレビューです。&lt;/p&gt;
           &lt;p&gt;ChatGPTで生成する場合はプロンプトを送信してください。&lt;/p&gt;
         </textarea>
-          <textarea id="cssEditor" placeholder="CSS をここに書いてください">body{font-family:system-ui, -apple-system, 'Segoe UI', Roboto, 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;padding:20px}
+        <textarea id="cssEditor" placeholder="CSS をここに書いてください">body{font-family:system-ui, -apple-system, 'Segoe UI', Roboto, 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;padding:20px}
             h1{color:#0b5}
           </textarea>
-        </div>
-        
-        <div class="tabs">
-          <div class="tab">HTML Viewer</div>
-          <div class="tab">CSS Viewer</div>
-        </div>
+      </div>
 
-       <div class="row controls">
-         <span class="note">ショートカット: Ctrl/Cmd+S 保存 • Ctrl/Cmd+Z Undo</span>
-       </div>
+      <div class="tabs">
+        <div class="tab">HTML Viewer</div>
+        <div class="tab">CSS Viewer</div>
+      </div>
+
+      <div class="row controls">
+        <span class="note">ショートカット: Ctrl/Cmd+S 保存 • Ctrl/Cmd+Z Undo</span>
+      </div>
 
       <div class="row controls">
         <button id="renderBtn">レンダー</button>
@@ -375,7 +387,7 @@
 
     <div class="right">
       <div class="row">
-       <button id="openNewTab">プレビュー</button>
+        <button id="openNewTab">プレビュー</button>
         <div id="sandboxContainer" class="hidden">
           <div class="sandbox-header">
             <button id="closeSandbox">閉じる</button>
@@ -397,7 +409,7 @@
     const WORKSPACE_KEY = 'mini-editor-workspace-v1';
     const SAVES_KEY = 'mini-editor-saves-v1';
 
-     // History for undo/redo
+    // History for undo/redo
     const MAX_HISTORY = 80;
     let history = [];
     let historyIndex = -1;
@@ -439,41 +451,41 @@
     pushHistory();
     renderPreview();
     refreshSaveList();
-    
+
     gptPrompt.style.padding = promptPadding + "px";
     textarea_resize(gptPrompt, promptModify);
-    gptPrompt.addEventListener('keyup', (e)=>{ textarea_resize(gptPrompt, promptModify); });
-    
+    gptPrompt.addEventListener('keyup', (e) => { textarea_resize(gptPrompt, promptModify); });
+
     // Buttons
-    renderBtn.addEventListener('click', ()=>{ pushHistory(); messageViewer('更新しました (render)'); renderPreview(); });
-    undoBtn.addEventListener('click', ()=>{ if(historyIndex>0) applySnapshot(historyIndex-1); });
-    redoBtn.addEventListener('click', ()=>{ if(historyIndex < history.length-1) applySnapshot(historyIndex+1); });
-    saveToListBtn.addEventListener('click', ()=>{ saveSnapshot(); });
-    downloadBtn.addEventListener('click', ()=>{ downloadHTML(); });
-    loadFileBtn.addEventListener('click', ()=>{fileInput.click();});
-    fileInput.addEventListener('change', (event)=>{inputHTML(event.target.files);})
-    deleteBtn.addEventListener('click', ()=>{deleteData()});
-    saveLocalBtn.addEventListener('click', ()=>{ saveWorkspaceToLocal(); messageViewer('保存しました (localStorage)'); renderPreview(); });
-    
+    renderBtn.addEventListener('click', () => { pushHistory(); messageViewer('更新しました (render)'); renderPreview(); });
+    undoBtn.addEventListener('click', () => { if (historyIndex > 0) applySnapshot(historyIndex - 1); });
+    redoBtn.addEventListener('click', () => { if (historyIndex < history.length - 1) applySnapshot(historyIndex + 1); });
+    saveToListBtn.addEventListener('click', () => { saveSnapshot(); });
+    downloadBtn.addEventListener('click', () => { downloadHTML(); });
+    loadFileBtn.addEventListener('click', () => { fileInput.click(); });
+    fileInput.addEventListener('change', (event) => { inputHTML(event.target.files); })
+    deleteBtn.addEventListener('click', () => { deleteData() });
+    saveLocalBtn.addEventListener('click', () => { saveWorkspaceToLocal(); messageViewer('保存しました (localStorage)'); renderPreview(); });
+
     // Input handlers
-    htmlEditor.addEventListener('input', ()=>{ schedulePushHistory(); });
-    cssEditor.addEventListener('input', ()=>{ schedulePushHistory(); });
+    htmlEditor.addEventListener('input', () => { schedulePushHistory(); });
+    cssEditor.addEventListener('input', () => { schedulePushHistory(); });
 
     document.body.addEventListener('dragover', (event) => {
-        event.preventDefault();
-        document.body.classList.add('dragover');
+      event.preventDefault();
+      document.body.classList.add('dragover');
     });
     document.body.addEventListener('dragleave', (event) => {
-        event.preventDefault();
-        document.body.classList.remove('dragover');
+      event.preventDefault();
+      document.body.classList.remove('dragover');
     });
-    document.body.addEventListener('drop', (event) => { 
-        event.preventDefault();
-        document.body.classList.remove('dragover');
-        if (confirm("HTMLファイルを読み込みますか？")) {
-          fileInput.files = event.dataTransfer.files;
-          inputHTML(fileInput.files);
-        }
+    document.body.addEventListener('drop', (event) => {
+      event.preventDefault();
+      document.body.classList.remove('dragover');
+      if (confirm("HTMLファイルを読み込みますか？")) {
+        fileInput.files = event.dataTransfer.files;
+        inputHTML(fileInput.files);
+      }
     });
 
     resetBtn.addEventListener("click", () => {
@@ -487,17 +499,17 @@
     });
 
     // Keyboard shortcuts
-    window.addEventListener('keydown', (ev)=>{
+    window.addEventListener('keydown', (ev) => {
       const mac = navigator.platform.toUpperCase().includes('MAC');
       const meta = mac ? ev.metaKey : ev.ctrlKey;
-      if (meta && ev.key.toLowerCase() === 's'){
+      if (meta && ev.key.toLowerCase() === 's') {
         ev.preventDefault();
         saveWorkspaceToLocal();
         messageViewer('保存しました (localStorage)');
-        renderPreview(); 
+        renderPreview();
       }
       // Provide Ctrl/Cmd+Shift+S to snapshot
-      if (meta && ev.shiftKey && ev.key.toLowerCase() === 's'){
+      if (meta && ev.shiftKey && ev.key.toLowerCase() === 's') {
         ev.preventDefault(); saveSnapshot();
       }
     });
@@ -510,7 +522,7 @@
         '<a$1href="javascript:void(0)"$2>'
       );
 
-      const content =`
+      const content = `
         <!doctype html>
         <html>
           <head>
@@ -534,7 +546,7 @@
       sandboxFrame.srcdoc = ""; // 中身をクリア
     });
 
-  tabs.forEach(tab => {
+    tabs.forEach(tab => {
       tab.addEventListener('click', () => {
         const isHTML = tab.textContent.match(/^html/i);
         const targetEditor = isHTML ? htmlEditor : cssEditor;
@@ -588,7 +600,7 @@
         header.appendChild(redoBtnFs);
         header.appendChild(saveBtnFs);
         header.appendChild(closeBtn);
-        
+
         fullscreen.appendChild(title);
         fullscreen.appendChild(header);
         fullscreen.appendChild(clone);
@@ -620,7 +632,7 @@
         const data = await res.json();
         const reply = data.reply;
         if (!reply) throw new Error("ChatGPTの返答が空です");
-        
+
         // body と style を抽出
         const bodyMatch = reply.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
         const styleMatch = reply.match(/<style[^>]*>([\s\S]*?)<\/style>/i);
@@ -628,11 +640,11 @@
           throw new Error("ChatGPTの返答に<body>または<style>が見つかりません。");
         }
         // ChatGPTの出力をエディタに反映
-        if(bodyMatch) htmlEditor.value = bodyMatch[1].trim();
-        if(styleMatch) cssEditor.value = styleMatch[1].trim();
+        if (bodyMatch) htmlEditor.value = bodyMatch[1].trim();
+        if (styleMatch) cssEditor.value = styleMatch[1].trim();
         pushHistory();
         renderPreview();
-        
+
         gptPrompt.value = "";
         textarea_resize(gptPrompt, promptModify);
       } catch (err) {
@@ -643,77 +655,77 @@
       }
     });
 
-  function saveWorkspaceToLocal(){
-    const obj = { html: htmlEditor.value, css: cssEditor.value, time: Date.now() };
-    try{ localStorage.setItem(WORKSPACE_KEY, JSON.stringify(obj)); }catch(e){console.warn('localStorage set failed', e)}
-  }
+    function saveWorkspaceToLocal() {
+      const obj = { html: htmlEditor.value, css: cssEditor.value, time: Date.now() };
+      try { localStorage.setItem(WORKSPACE_KEY, JSON.stringify(obj)); } catch (e) { console.warn('localStorage set failed', e) }
+    }
 
-  function loadWorkspaceFromLocal(){
-    try{
-      const raw = localStorage.getItem(WORKSPACE_KEY);
-      if (raw){
-        const obj = JSON.parse(raw);
-        htmlEditor.value = obj.html || htmlEditor.value;
-        cssEditor.value = obj.css || cssEditor.value;
-      }
-    }catch(e){console.warn('local load failed', e)}
-  }
+    function loadWorkspaceFromLocal() {
+      try {
+        const raw = localStorage.getItem(WORKSPACE_KEY);
+        if (raw) {
+          const obj = JSON.parse(raw);
+          htmlEditor.value = obj.html || htmlEditor.value;
+          cssEditor.value = obj.css || cssEditor.value;
+        }
+      } catch (e) { console.warn('local load failed', e) }
+    }
 
-  // Saves list (snapshots)
-  function loadSaves(){
-    try{
-      const raw = localStorage.getItem(SAVES_KEY);
-      return raw ? JSON.parse(raw) : [];
-    }catch(e){return[]}
-  }
-  function storeSaves(arr){
-    try{ localStorage.setItem(SAVES_KEY, JSON.stringify(arr)); }catch(e){console.warn('save list store failed', e)}
-  }
+    // Saves list (snapshots)
+    function loadSaves() {
+      try {
+        const raw = localStorage.getItem(SAVES_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) { return [] }
+    }
+    function storeSaves(arr) {
+      try { localStorage.setItem(SAVES_KEY, JSON.stringify(arr)); } catch (e) { console.warn('save list store failed', e) }
+    }
 
-  function refreshSaveList(){
-    const arr = loadSaves();
-    saveList.innerHTML = '';
-    if (!arr.length) { saveList.innerHTML = '<div class="note">保存はまだありません</div>'; return; }
-    arr.slice().reverse().forEach((s, i)=>{
-      const idx = arr.length - 1 - i; // original index
-      const el = document.createElement('div'); el.className = 'save-item';
-      const left = document.createElement('div'); left.innerHTML = `<div style="font-size:13px">${escapeHtml(s.name||'無名')} <small class="note">・${new Date(s.time).toLocaleString()}</small></div>`;
-      const right = document.createElement('div');
-      const loadBtn = document.createElement('button'); loadBtn.textContent='読み込む'; loadBtn.onclick = ()=>{ if(confirm('読み込みますか？ 現在の作業は上書きされます。')){ htmlEditor.value = s.html; cssEditor.value = s.css; pushHistory(); renderPreview(); }};
-      const delBtn = document.createElement('button'); delBtn.textContent='削除'; delBtn.className='ghost'; delBtn.onclick = ()=>{ if(confirm('削除してよいですか？')){ const a = loadSaves(); a.splice(idx,1); storeSaves(a); refreshSaveList(); }};
-      right.appendChild(loadBtn); right.appendChild(delBtn);
-      el.appendChild(left); el.appendChild(right);
-      saveList.appendChild(el);
-    })
-  }
+    function refreshSaveList() {
+      const arr = loadSaves();
+      saveList.innerHTML = '';
+      if (!arr.length) { saveList.innerHTML = '<div class="note">保存はまだありません</div>'; return; }
+      arr.slice().reverse().forEach((s, i) => {
+        const idx = arr.length - 1 - i; // original index
+        const el = document.createElement('div'); el.className = 'save-item';
+        const left = document.createElement('div'); left.innerHTML = `<div style="font-size:13px">${escapeHtml(s.name || '無名')} <small class="note">・${new Date(s.time).toLocaleString()}</small></div>`;
+        const right = document.createElement('div');
+        const loadBtn = document.createElement('button'); loadBtn.textContent = '読み込む'; loadBtn.onclick = () => { if (confirm('読み込みますか？ 現在の作業は上書きされます。')) { htmlEditor.value = s.html; cssEditor.value = s.css; pushHistory(); renderPreview(); } };
+        const delBtn = document.createElement('button'); delBtn.textContent = '削除'; delBtn.className = 'ghost'; delBtn.onclick = () => { if (confirm('削除してよいですか？')) { const a = loadSaves(); a.splice(idx, 1); storeSaves(a); refreshSaveList(); } };
+        right.appendChild(loadBtn); right.appendChild(delBtn);
+        el.appendChild(left); el.appendChild(right);
+        saveList.appendChild(el);
+      })
+    }
 
-  function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    function escapeHtml(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
-  // Save current as snapshot to saves list
-  function saveSnapshot(){
-    const arr = loadSaves();
-    arr.push({ name: saveName.value || 'snapshot', html: htmlEditor.value, css: cssEditor.value, time: Date.now() });
-    storeSaves(arr);
-    refreshSaveList();
-    saveName.value = '';
-    alert('スナップショットを保存しました');
-  }
+    // Save current as snapshot to saves list
+    function saveSnapshot() {
+      const arr = loadSaves();
+      arr.push({ name: saveName.value || 'snapshot', html: htmlEditor.value, css: cssEditor.value, time: Date.now() });
+      storeSaves(arr);
+      refreshSaveList();
+      saveName.value = '';
+      alert('スナップショットを保存しました');
+    }
 
-  // Download as .html file
-  function downloadHTML(){
-    const content = `<!doctype html><html><head><meta charset="utf-8"><title>Export</title><style>${cssEditor.value}</style></head><body>${htmlEditor.value}</body></html>`;
-    const blob = new Blob([content], { type: 'text/html' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = (saveName.value || 'export') + '.html';
-    document.body.appendChild(a); a.click(); a.remove();
-  }
+    // Download as .html file
+    function downloadHTML() {
+      const content = `<!doctype html><html><head><meta charset="utf-8"><title>Export</title><style>${cssEditor.value}</style></head><body>${htmlEditor.value}</body></html>`;
+      const blob = new Blob([content], { type: 'text/html' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = (saveName.value || 'export') + '.html';
+      document.body.appendChild(a); a.click(); a.remove();
+    }
 
-  function inputHTML(data){
-    const file = data[0];
-    console.log(file);
+    function inputHTML(data) {
+      const file = data[0];
+      console.log(file);
       if (!file || file.type !== 'text/html') {
-          return window.alert("ファイルが対応しておりません");
+        return window.alert("ファイルが対応しておりません");
       }
 
       const reader = new FileReader();
@@ -745,66 +757,66 @@
         renderPreview();
       };
 
-    reader.readAsText(file, "utf-8");
-  }
+      reader.readAsText(file, "utf-8");
+    }
 
-  function deleteData(){
+    function deleteData() {
       if (confirm("本当にすべての保存データを削除して初期化しますか？")) {
-          sessionStorage.clear();
-          localStorage.clear();
-          history = [];
-          historyIndex = -1;
-          htmlEditor.value = defaultHTML || "";
-          cssEditor.value = defaultCSS || ""
-          preview.srcdoc = "<!DOCTYPE html><html><head><meta charset='UTF-8'></head><body></body></html>";
-          messageViewer("初期化しました。");
-          
-          loadWorkspaceFromLocal();
-          pushHistory();
-          renderPreview();
-          refreshSaveList();
+        sessionStorage.clear();
+        localStorage.clear();
+        history = [];
+        historyIndex = -1;
+        htmlEditor.value = defaultHTML || "";
+        cssEditor.value = defaultCSS || ""
+        preview.srcdoc = "<!DOCTYPE html><html><head><meta charset='UTF-8'></head><body></body></html>";
+        messageViewer("初期化しました。");
+
+        loadWorkspaceFromLocal();
+        pushHistory();
+        renderPreview();
+        refreshSaveList();
       }
-  }
+    }
 
-  function pushHistory() {
-    const snapshot = { html: htmlEditor.value, css: cssEditor.value, time: Date.now() };
-    // If we're not at the end, drop forward history
-    if (historyIndex < history.length - 1) history = history.slice(0, historyIndex + 1);
-    history.push(snapshot);
-    if (history.length > MAX_HISTORY) history.shift();
-    historyIndex = history.length - 1;
-    updateUndoRedoButtons();
-    saveWorkspaceToLocal();
-  }
+    function pushHistory() {
+      const snapshot = { html: htmlEditor.value, css: cssEditor.value, time: Date.now() };
+      // If we're not at the end, drop forward history
+      if (historyIndex < history.length - 1) history = history.slice(0, historyIndex + 1);
+      history.push(snapshot);
+      if (history.length > MAX_HISTORY) history.shift();
+      historyIndex = history.length - 1;
+      updateUndoRedoButtons();
+      saveWorkspaceToLocal();
+    }
 
-  function updateUndoRedoButtons(){
-    undoBtn.disabled = historyIndex <= 0;
-    redoBtn.disabled = historyIndex >= history.length - 1;
-  }
+    function updateUndoRedoButtons() {
+      undoBtn.disabled = historyIndex <= 0;
+      redoBtn.disabled = historyIndex >= history.length - 1;
+    }
 
-  function applySnapshot(idx){
-    if (idx < 0 || idx >= history.length) return;
-    const s = history[idx];
-    htmlEditor.value = s.html;
-    cssEditor.value = s.css;
-    historyIndex = idx;
-    renderPreview();
-    saveWorkspaceToLocal();
-    updateUndoRedoButtons();
-  }
+    function applySnapshot(idx) {
+      if (idx < 0 || idx >= history.length) return;
+      const s = history[idx];
+      htmlEditor.value = s.html;
+      cssEditor.value = s.css;
+      historyIndex = idx;
+      renderPreview();
+      saveWorkspaceToLocal();
+      updateUndoRedoButtons();
+    }
 
-  // debounce pushHistory
-  function schedulePushHistory(){
-    if (typingTimer) clearTimeout(typingTimer);
-    typingTimer = setTimeout(() => { pushHistory(); }, 400);
-  }
+    // debounce pushHistory
+    function schedulePushHistory() {
+      if (typingTimer) clearTimeout(typingTimer);
+      typingTimer = setTimeout(() => { pushHistory(); }, 400);
+    }
 
-  // Render iframe using srcdoc
-  function renderPreview(){
-    htmlEditor.value = htmlEditor.value.replace(/<script[\s\S]*?<\/script>/gi, "")
-      .replace(/<script[^>]*src=["'][^"']*["'][^>]*><\/script>/gi, "");
+    // Render iframe using srcdoc
+    function renderPreview() {
+      htmlEditor.value = htmlEditor.value.replace(/<script[\s\S]*?<\/script>/gi, "")
+        .replace(/<script[^>]*src=["'][^"']*["'][^>]*><\/script>/gi, "");
 
-    const doc = `
+      const doc = `
       <!doctype html>
       <html>
         <head>
@@ -825,34 +837,35 @@
           </body>
       </html>`;
       preview.srcdoc = doc;
-  }
+    }
 
-  function textarea_resize(id, num){
-    setTimeout(() => {
+    function textarea_resize(id, num) {
+      setTimeout(() => {
         id.style.minHeight = 0;
         id.style.minHeight = (id.scrollHeight - num) + "px";
-    }, 100);
-  }
+      }, 100);
+    }
 
-  function messageViewer(text, element) {
-    let message = document.createElement('dialog');
-    message.setAttribute('open', true);
-    message.id = "msg";
-    message.style.zIndex = 1000;
-    message.textContent = String(text) || "";
-    if (!element) {
+    function messageViewer(text, element) {
+      let message = document.createElement('dialog');
+      message.setAttribute('open', true);
+      message.id = "msg";
+      message.style.zIndex = 1000;
+      message.textContent = String(text) || "";
+      if (!element) {
         element = document.body;
-    }
-    if (messageTimer) {
+      }
+      if (messageTimer) {
         element.appendChild(message);
-        setTimeout(function() {
-            element.removeChild(message);
-            messageTimer = true;
+        setTimeout(function () {
+          element.removeChild(message);
+          messageTimer = true;
         }, 1000);
+      }
+      messageTimer = false;
     }
-    messageTimer = false;
-}
 
   </script>
 </body>
+
 </html>

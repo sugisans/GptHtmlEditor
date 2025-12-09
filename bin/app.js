@@ -210,20 +210,28 @@ function RouteSetting(req, res) {
                 let data = '';
                 req.on('data', chunk => data += chunk)
                 .on('end', async () => {
-                    if (data && req.headers['content-type']) {
-                        if(req.headers['content-type'].indexOf('application/x-www-form-urlencoded') !== -1){
-                            decodeURIComponent(data).split('&').forEach(out => {
-                                let key = out.split('=')[0].trim();
-                                let value = out.split('=')[1].replace(/\+/g, ' ').trim();
-                                POST[key] = value;
-                            });
-                        }else if(req.headers['content-type'].indexOf('application/json') !== -1){
-                            const json = JSON.parse(data);
-                            for(let key in json){
-                                POST[key] = json[key];
+                    try{
+                        if (data && req.headers['content-type']) {
+                            if(req.headers['content-type'].indexOf('application/x-www-form-urlencoded') !== -1){
+                                data.split('&').forEach(out => {
+                                    let key = out.split('=')[0].trim();
+                                    let value = out.split('=')[1].replace(/\+/g, ' ').trim();
+                                    POST[key] = value;
+                                });
+                            }else if(req.headers['content-type'].indexOf('application/json') !== -1){
+                                const json = JSON.parse(data);
+                                for(let key in json){
+                                    POST[key] = json[key];
+                                }
                             }
                         }
+                    }catch(e){
+                        POST.forEach(key => {
+                            delete POST[key];
+                        });
+                        console.error(`${e.name} post data parse error`);
                     }
+                    
                     answer = await gpt_render(POST);
                     code = answer ? 200 : 400;
                     res.writeHead(code, {'Content-Type': content_type});
@@ -335,8 +343,8 @@ async function gpt_render(REQUEST){
                 model: config['GPT']['model'],
                 messages: [
                     { role: "system", content: "あなた優秀なHTML/CSSコーダーです。履歴のコードをもとに上手に修正する事もできます。" },
+                    { role: "assistant", content: history },
                     { role: "user", content: question },
-                    { role: "assistant", content: history }
                 ],
                 temperature: config['GPT']['temperature'] || 0.7,
             });
@@ -373,7 +381,7 @@ function request_get(data) {
     try {
         const array = [];
         if (data) {
-            data = decodeURIComponent(data).split('?')[1];
+            data = data.split('?')[1];
             if (data) {
                 data.split('&').forEach(function(out) {
                     let key = out.split('=')[0].trim();
