@@ -216,7 +216,7 @@ function RouteSetting(req, res) {
                                 data.split('&').forEach(out => {
                                     let key = out.split('=')[0].trim();
                                     let value = out.split('=')[1].replace(/\+/g, ' ').trim();
-                                    POST[key] = value;
+                                    POST[key] = decodeURIComponent(value);
                                 });
                             }else if(req.headers['content-type'].indexOf('application/json') !== -1){
                                 const json = JSON.parse(data);
@@ -386,7 +386,7 @@ function request_get(data) {
                 data.split('&').forEach(function(out) {
                     let key = out.split('=')[0].trim();
                     let value = out.split('=')[1].trim();
-                    array[key] = value;
+                    array[key] = decodeURIComponent(value);
                 });
             }
         }
@@ -401,10 +401,10 @@ function get_cookie(data) {
     try {
         const array = [];
         if (data) {
-            decodeURIComponent(data).split(';').forEach(function(out) {
+            data.split(';').forEach(function(out) {
                 let key = out.split('=')[0].trim();
                 let value = out.split('=')[1].trim();
-                array[key] = value;
+                array[key] = decodeURIComponent(value);
             });
         }
         return array;
