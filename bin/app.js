@@ -171,7 +171,7 @@ cluster.on('exit', function(worker, code, signal) {
 //request
 function RouteSetting(req, res) {
     try {
-        const urldata = new URL(req.url, `${req.protocol || 'http'}://${req.headers.host}`);
+        const urldata = new URL(req.url, `http://${req.headers.host}`);
         const extname = String(path.extname(urldata.pathname)).toLowerCase();
         const ip = req.headers['x-forwarded-for'] ? String(req.headers['x-forwarded-for']).split(',', 2)[0] : req.socket['remoteAddress'];
         const ua = req.headers['user-agent'];
