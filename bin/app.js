@@ -226,9 +226,7 @@ function RouteSetting(req, res) {
                             }
                         }
                     }catch(e){
-                        POST.forEach(key => {
-                            delete POST[key];
-                        });
+                        POST.forEach(key => {delete POST[key];});
                         console.error(`${e.name} post data parse error`);
                     }
                     
