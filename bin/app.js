@@ -240,7 +240,7 @@ function RouteSetting(req, res) {
                     res.end(answer);
                 });
             } else {
-                const GET = request_get(url.parse(req.url, true).search);
+                const GET = request_get(urldata.search);
                 (async () => {
                     answer = await gpt_render(GET);
                     code = answer ? 200 : 400;
