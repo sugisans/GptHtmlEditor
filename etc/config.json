@@ -17,7 +17,7 @@
         "file": "accesss.log"
     },
     "GPT": {
-        "temperature": 0.7,
+        "temperature": 1,
         "model": "gpt-4.1-mini",
         "key": ""
     }

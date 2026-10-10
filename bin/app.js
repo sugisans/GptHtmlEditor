@@ -29,8 +29,7 @@ const configuration = new Configuration({
 const MODIFY = "\n以上の内容でHTMLとCSSを一つにまとめてコードを出力してください。コード以外の説明は不要です。";
 const SYSTEM = "あなた優秀なHTML/CSSコーダーです。履歴のコードをもとに上手に修正する事もできます。";
 const MODEL = config['GPT']['model'] || "gpt-4.1-mini";
-const TEMPERATURE = config['GPT']['temperature'] && MODEL.split(/mini/).length > 1 ? config['GPT']['temperature'] : 1;
-
+const TEMPERATURE = config['GPT']['temperature'] || 1;
 //config option
 for (let i = 2; i < process.argv.length; i += 2) {
     let value = process.argv[i + 1];
@@ -161,6 +160,7 @@ if (cluster.isMaster) {
 
     const msg = process.env.msg;
     process.send(`from worker (${msg})`);
+    console.log(`gpt model=${MODEL}, temperature=${TEMPERATURE}`);
     console.log(`PORT=${process.env.PORT || port}\n${config['title']} (${os}) running!`);
 }
 
@@ -350,7 +350,6 @@ async function gpt_render(REQUEST){
                 temperature: TEMPERATURE,
             });
             answer['reply'] = completion.data.choices[0].message.content;
-            console.log(`gpt model=${MODEL}, temperature=${TEMPERATURE}`);
         }
         return JSON.stringify(answer); 
     }catch(e){
