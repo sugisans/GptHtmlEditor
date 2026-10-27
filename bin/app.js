@@ -1,13 +1,12 @@
 'use strict';
 
 const http = require('http');
-const url = require('url');
 const fs = require('fs');
 const ejs = require('ejs');
 const path = require('path');
 const cluster = require('cluster');
 const cpu = require('os').cpus();
-const { Configuration, OpenAIApi } = require("openai");
+const OpenAI = require("openai");
 
 const root_dir = path.join(__dirname, '../');
 const configFile = fs.readFileSync(root_dir + 'etc/config.json', 'UTF-8');
@@ -23,7 +22,7 @@ const status_code = JSON.parse(statusFile);
 const os = process.platform;
 
 //api value
-const configuration = new Configuration({
+const openai= new OpenAI({
     apiKey: process.env.OPENAI_API_KEY || config['GPT']['key'] 
 });
 const MODIFY = "\n以上の内容でHTMLとCSSを一つにまとめてコードを出力してください。コード以外の説明は不要です。";
@@ -339,17 +338,16 @@ async function gpt_render(REQUEST){
         if(REQUEST && REQUEST['message']){
             const question = REQUEST['message'] + MODIFY;
             const history = REQUEST['html'] && REQUEST['css'] ? `HTML:\n${REQUEST['html']}\n\nCSS:\n${REQUEST['css']}\n\n` : "";
-            const openai = new OpenAIApi(configuration);
-            const completion = await openai.createChatCompletion({
+            const completion = await openai.chat.completions.create({
                 model: MODEL,
+                temperature: TEMPERATURE,
                 messages: [
                     { role: "system", content: SYSTEM },
                     { role: "assistant", content: history },
                     { role: "user", content: question },
                 ],
-                temperature: TEMPERATURE,
             });
-            answer['reply'] = completion.data.choices[0].message.content;
+            answer['reply'] = completion.choices[0].message.content;
         }
         return JSON.stringify(answer); 
     }catch(e){
